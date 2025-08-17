@@ -14,7 +14,7 @@ export async function scrapeAndProcessCharacters(): Promise<{
   try {
     const mainPageResponse = await fetch(`${BASE_URL}${CHARACTERS_PATH}`);
     if (!mainPageResponse.ok) {
-      return { data: null, error: "Failed to fetch main character page." };
+      return { data: null, error: `Failed to fetch main character page. Status: ${mainPageResponse.status}` };
     }
     const mainPageHtml = await mainPageResponse.text();
     const $ = cheerio.load(mainPageHtml);
@@ -37,13 +37,18 @@ export async function scrapeAndProcessCharacters(): Promise<{
       try {
         const subPageResponse = await fetch(`${BASE_URL}${link}`);
         if (!subPageResponse.ok) {
-          console.error(`Failed to fetch subpage: ${link}`);
+          console.error(`Failed to fetch subpage: ${link}, Status: ${subPageResponse.status}`);
           return null;
         }
         const subPageHtml = await subPageResponse.text();
         const $$ = cheerio.load(subPageHtml);
 
         const name = $$('.combined h2 > strong:first-child').text().trim();
+        if (!name) {
+            console.warn(`Could not find character name on page: ${link}`);
+            return null;
+        }
+
         const imageUrl = $$('.afk-ex-row.data .column.character img').attr("src") || "";
         const id = imageUrl.split("/").pop()?.split(".")[0] || name.toLowerCase().replace(/\s/g, '-');
         
@@ -57,13 +62,13 @@ export async function scrapeAndProcessCharacters(): Promise<{
         
         const gatsbyImages = $$('.combined > h2 .gatsby-image-wrapper');
         const rarityUrl = $$(gatsbyImages[0]).find('img').attr('src') || '';
-        const classUrl = $$(gatsbyImages[1]).find('img').src() || '';
-        const factionUrl = $$(gatsbyImages[2]).find('img').src() || '';
+        const classUrl = $$(gatsbyImages[1]).find('img').attr('src') || '';
+        const factionUrl = $$(gatsbyImages[2]).find('img').attr('src') || '';
         
         const investmentRows = $$('.afk-ex-row.data .column.ex');
-        const pve = $$(investmentRows[0]).find('strong').text().trim();
-        const pvp = $$(investmentRows[1]).find('strong').text().trim();
-        const priority = $$('.afk-ex-row.data .column.priority p').text().trim();
+        const pve = $$(investmentRows[0]).find('strong').text().trim() || 'N/A';
+        const pvp = $$(investmentRows[1]).find('strong').text().trim() || 'N/A';
+        const priority = $$('.afk-ex-row.data .column.priority p').text().trim() || 'N/A';
 
         const character: Character = {
           id,
@@ -74,10 +79,10 @@ export async function scrapeAndProcessCharacters(): Promise<{
           pve,
           pvp,
           priority,
-          imageUrl: `${BASE_URL}${imageUrl}`,
-          rarityUrl: `${BASE_URL}${rarityUrl}`,
-          factionUrl: `${BASE_URL}${factionUrl}`,
-          classUrl: `${BASE_URL}${classUrl}`,
+          imageUrl: imageUrl ? `${BASE_URL}${imageUrl}` : 'https://placehold.co/250x250.png',
+          rarityUrl: rarityUrl ? `${BASE_URL}${rarityUrl}` : 'https://placehold.co/32x32.png',
+          factionUrl: factionUrl ? `${BASE_URL}${factionUrl}` : 'https://placehold.co/32x32.png',
+          classUrl: classUrl ? `${BASE_URL}${classUrl}` : 'https://placehold.co/32x32.png',
         };
         return character;
       } catch (e) {
@@ -93,9 +98,10 @@ export async function scrapeAndProcessCharacters(): Promise<{
     return { data: characters, error: null };
   } catch (error) {
     console.error("An error occurred during scraping:", error);
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
     return {
       data: null,
-      error: "An unexpected error occurred. See server logs for details.",
+      error: `An unexpected error occurred: ${errorMessage}. See server logs for details.`,
     };
   }
 }
