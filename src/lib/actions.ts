@@ -1,3 +1,4 @@
+
 "use server";
 
 import * as cheerio from "cheerio";
@@ -19,7 +20,7 @@ export async function scrapeAndProcessCharacters(): Promise<{
     const $ = cheerio.load(mainPageHtml);
 
     const characterLinks: string[] = [];
-    $(".character-list .character-item a").each((_, element) => {
+    $("a.character-card").each((_, element) => {
       const href = $(element).attr("href");
       if (href) {
         characterLinks.push(href);
@@ -36,9 +37,9 @@ export async function scrapeAndProcessCharacters(): Promise<{
         const subPageHtml = await subPageResponse.text();
         const $$ = cheerio.load(subPageHtml);
 
-        const imageUrl = $$('img[width="160"][height="160"]').attr("src") || "";
+        const imageUrl = $$('.character-info-left .character-image-wrapper img').attr("src") || "";
         const id = imageUrl.split("/").pop()?.split(".")[0] || "unknown";
-        const name = $$('img[width="160"][height="160"]').attr("alt") || "Unknown";
+        const name = $$('.character-info-left .character-image-wrapper img').attr("alt") || "Unknown";
 
         const getInfo = (selector: string) => ({
           text: $$(selector).find("span").text().trim(),
@@ -55,9 +56,9 @@ export async function scrapeAndProcessCharacters(): Promise<{
           rarity: rarityInfo.text,
           faction: factionInfo.text,
           class: classInfo.text,
-          pve: $$(".column.pve p").text().trim(),
-          pvp: $$(".column.pvp p").text().trim(),
-          priority: $$(".column.priority p").text().trim(),
+          pve: $$(".tier-big-container.pve .tier-text").text().trim(),
+          pvp: $$(".tier-big-container.pvp .tier-text").text().trim(),
+          priority: $$(".tier-big-container.db .tier-text").text().trim(),
           imageUrl: `${BASE_URL}${imageUrl}`,
           rarityUrl: `${BASE_URL}${rarityInfo.url}`,
           factionUrl: `${BASE_URL}${factionInfo.url}`,
