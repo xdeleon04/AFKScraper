@@ -30,7 +30,7 @@ export async function scrapeAndProcessCharacters(): Promise<{
     const uniqueLinks = [...new Set(characterLinks)];
 
     if (uniqueLinks.length === 0) {
-        return { data: [], error: "Could not find any character links on the page." };
+        return { data: [], error: "Could not find any character links on the page. The website structure may have changed." };
     }
 
     const characterPromises = uniqueLinks.map(async (link) => {
@@ -43,33 +43,34 @@ export async function scrapeAndProcessCharacters(): Promise<{
         const subPageHtml = await subPageResponse.text();
         const $$ = cheerio.load(subPageHtml);
 
-        const name = $$('.combined h2 > strong:first-child').text().trim();
+        const name = $$('.combined h2 > strong').first().text().trim();
         if (!name) {
             console.warn(`Could not find character name on page: ${link}`);
             return null;
         }
-
-        const imageUrl = $$('.afk-ex-row.data .column.character img').attr("src") || "";
-        const id = imageUrl.split("/").pop()?.split(".")[0] || name.toLowerCase().replace(/\s/g, '-');
         
         const h2Text = $$('.combined > h2').text();
         const rarityMatch = h2Text.match(/is an (A-Level|S-Level)/);
         const rarityText = rarityMatch ? rarityMatch[1] : 'Unknown';
 
         const strongs = $$('.combined > h2 > strong');
-        const factionText = $$(strongs[0]).text().trim(); 
         const classText = $$(strongs[1]).text().trim();
+        const factionText = $$(strongs[2]).text().trim();
         
         const gatsbyImages = $$('.combined > h2 .gatsby-image-wrapper');
         const rarityUrl = $$(gatsbyImages[0]).find('img').attr('src') || '';
         const classUrl = $$(gatsbyImages[1]).find('img').attr('src') || '';
         const factionUrl = $$(gatsbyImages[2]).find('img').attr('src') || '';
-        
-        const investmentRows = $$('.afk-ex-row.data .column.ex');
-        const pve = $$(investmentRows[0]).find('strong').text().trim() || 'N/A';
-        const pvp = $$(investmentRows[1]).find('strong').text().trim() || 'N/A';
-        const priority = $$('.afk-ex-row.data .column.priority p').text().trim() || 'N/A';
 
+        const imageUrl = $$('.afk-ex-row.data .column.character img').attr("src") || "";
+        const id = imageUrl.split("/").pop()?.split(".")[0] || name.toLowerCase().replace(/\s/g, '-');
+        
+        const priority = $$('.column.priority p').text().trim() || 'N/A';
+
+        const investmentColumns = $$('.column.ex');
+        const pve = $$(investmentColumns[0]).find('strong').text().trim() || 'N/A';
+        const pvp = $$(investmentColumns[1]).find('strong').text().trim() || 'N/A';
+        
         const character: Character = {
           id,
           name,
