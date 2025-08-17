@@ -42,7 +42,7 @@ export default function Home() {
       name: char.name,
       rarity: char.rarity,
       faction: char.faction,
-      type: char.class,
+      class: char.class,
       pve: char.pve,
       pvp: char.pvp,
       priority: char.priority,
