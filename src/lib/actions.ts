@@ -6,6 +6,7 @@ import type { Character } from "./types";
 
 const BASE_URL = "https://prydwen.gg";
 const CHARACTERS_PATH = "/afk-journey/characters/";
+let fallbackId = 100;
 
 export async function scrapeAndProcessCharacters(): Promise<{
   data: Character[] | null;
@@ -48,7 +49,7 @@ export async function scrapeAndProcessCharacters(): Promise<{
             console.warn(`Could not find character name on page: ${link}`);
             return null;
         }
-        
+
         const h2Text = $$('.combined > h2').text();
         const rarityMatch = h2Text.match(/is an (A-Level|S-Level)/);
         const rarityText = rarityMatch ? rarityMatch[1] : 'Unknown';
@@ -56,21 +57,22 @@ export async function scrapeAndProcessCharacters(): Promise<{
         const strongs = $$('.combined > h2 > strong');
         const classText = $$(strongs[1]).text().trim();
         const factionText = $$(strongs[2]).text().trim();
-        
-        const gatsbyImages = $$('.combined > h2 .gatsby-image-wrapper');
-        const rarityUrl = $$(gatsbyImages[0]).find('img').attr('src') || '';
-        const classUrl = $$(gatsbyImages[1]).find('img').attr('src') || '';
-        const factionUrl = $$(gatsbyImages[2]).find('img').attr('src') || '';
 
-        const imageUrl = $$('.afk-ex-row.data .column.character img').attr("src") || "";
-        const id = imageUrl.split("/").pop()?.split(".")[0] || name.toLowerCase().replace(/\s/g, '-');
-        
+        const gatsbyImages = $$('.combined > h2 .gatsby-image-wrapper picture img');
+        const rarityUrl = $$(gatsbyImages[0]).attr('data-src') || '';
+        const classUrl = $$(gatsbyImages[1]).attr('data-src') || '';
+        const factionUrl = $$(gatsbyImages[2]).attr('data-src') || '';
+
+        const afkExRow = $$('.afk-ex-row.data .column.character img');
+        const imageUrl = $$(afkExRow[1]).attr('data-src') || '';
+        const id = imageUrl.split("/").pop()?.match(/^\d+/)?.[0] || (fallbackId++).toString();
+
         const priority = $$('.column.priority p').text().trim() || 'N/A';
 
         const investmentColumns = $$('.column.ex');
         const pve = $$(investmentColumns[0]).find('strong').text().trim() || 'N/A';
         const pvp = $$(investmentColumns[1]).find('strong').text().trim() || 'N/A';
-        
+
         const character: Character = {
           id,
           name,
@@ -95,7 +97,7 @@ export async function scrapeAndProcessCharacters(): Promise<{
     const characters = (await Promise.all(characterPromises)).filter(
       (c): c is Character => c !== null
     );
-    
+
     return { data: characters, error: null };
   } catch (error) {
     console.error("An error occurred during scraping:", error);
