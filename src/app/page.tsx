@@ -7,7 +7,7 @@ import { scrapeAndProcessCharacters } from "@/lib/actions";
 import type { Character } from "@/lib/types";
 import { CharacterCard } from "@/components/character-card";
 import { CharacterCardSkeleton } from "@/components/character-card-skeleton";
-import { Wand2 } from "lucide-react";
+import { Download, Wand2 } from "lucide-react";
 
 export default function Home() {
   const [characters, setCharacters] = useState<Character[]>([]);
@@ -34,6 +34,37 @@ export default function Home() {
     setIsLoading(false);
   };
 
+  const handleDownload = () => {
+    if (characters.length === 0) return;
+
+    const dataToDownload = characters.map(char => ({
+      id: parseInt(char.id, 10),
+      name: char.name,
+      rarity: char.rarity,
+      faction: char.faction,
+      type: char.class,
+      pve: char.pve,
+      pvp: char.pvp,
+      priority: char.priority,
+      completed: false, // Defaulted to false as requested
+      imageUrl: char.imageUrl,
+      rarityUrl: char.rarityUrl,
+      factionUrl: char.factionUrl,
+      typeUrl: char.classUrl,
+    }));
+
+    const jsonString = JSON.stringify(dataToDownload, null, 2);
+    const blob = new Blob([jsonString], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "characters.json";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <main className="container mx-auto px-4 py-8">
       <div className="flex flex-col items-center text-center mb-12">
@@ -52,15 +83,26 @@ export default function Home() {
           </a>
           .
         </p>
-        <Button
-          onClick={handleScrape}
-          disabled={isLoading}
-          className="mt-8 bg-accent text-accent-foreground hover:bg-accent/90"
-          size="lg"
-        >
-          <Wand2 className="mr-2 h-5 w-5" />
-          {isLoading ? "Scraping, please wait..." : "Start Scraping"}
-        </Button>
+        <div className="flex flex-wrap justify-center gap-4 mt-8">
+          <Button
+            onClick={handleScrape}
+            disabled={isLoading}
+            className="bg-accent text-accent-foreground hover:bg-accent/90"
+            size="lg"
+          >
+            <Wand2 className="mr-2 h-5 w-5" />
+            {isLoading ? "Scraping, please wait..." : "Start Scraping"}
+          </Button>
+          <Button
+            onClick={handleDownload}
+            disabled={characters.length === 0 || isLoading}
+            variant="outline"
+            size="lg"
+          >
+            <Download className="mr-2 h-5 w-5" />
+            Download JSON
+          </Button>
+        </div>
       </div>
 
       <div>
