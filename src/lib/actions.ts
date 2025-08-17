@@ -20,14 +20,20 @@ export async function scrapeAndProcessCharacters(): Promise<{
     const $ = cheerio.load(mainPageHtml);
 
     const characterLinks: string[] = [];
-    $("a.character-card").each((_, element) => {
+    $("div.avatar-card a").each((_, element) => {
       const href = $(element).attr("href");
-      if (href) {
+      if (href && href.startsWith("/afk-journey/characters/")) {
         characterLinks.push(href);
       }
     });
 
-    const characterPromises = characterLinks.map(async (link) => {
+    const uniqueLinks = [...new Set(characterLinks)];
+
+    if (uniqueLinks.length === 0) {
+        return { data: [], error: "Could not find any character links on the page." };
+    }
+
+    const characterPromises = uniqueLinks.map(async (link) => {
       try {
         const subPageResponse = await fetch(`${BASE_URL}${link}`);
         if (!subPageResponse.ok) {
@@ -37,21 +43,22 @@ export async function scrapeAndProcessCharacters(): Promise<{
         const subPageHtml = await subPageResponse.text();
         const $$ = cheerio.load(subPageHtml);
 
+        const name = $$('.combined h2 > strong:first-child').text().trim();
         const imageUrl = $$('.afk-ex-row.data .column.character img').attr("src") || "";
-        const id = imageUrl.split("/").pop()?.split(".")[0] || "unknown";
-        const name = $$('.afk-ex-row.data .column.character .inline-name').text().trim() || "Unknown";
-
-        const combinedH2 = $$('.combined > h2');
-        const strongs = combinedH2.find('strong');
-
-        const rarityText = $$(strongs[1]).text().trim(); // A-Level
-        const classText = $$(strongs[2]).text().trim(); // Warrior
-        const factionText = $$(strongs[0]).text().trim(); // Wilder
+        const id = imageUrl.split("/").pop()?.split(".")[0] || name.toLowerCase().replace(/\s/g, '-');
         
-        const gatsbyImages = combinedH2.find('div.gatsby-image-wrapper');
+        const h2Text = $$('.combined > h2').text();
+        const rarityMatch = h2Text.match(/is an (A-Level|S-Level)/);
+        const rarityText = rarityMatch ? rarityMatch[1] : 'Unknown';
+
+        const strongs = $$('.combined > h2 > strong');
+        const factionText = $$(strongs[0]).text().trim(); 
+        const classText = $$(strongs[1]).text().trim();
+        
+        const gatsbyImages = $$('.combined > h2 .gatsby-image-wrapper');
         const rarityUrl = $$(gatsbyImages[0]).find('img').attr('src') || '';
-        const classUrl = $$(gatsbyImages[1]).find('img').attr('src') || '';
-        const factionUrl = $$(gatsbyImages[2]).find('img').attr('src') || '';
+        const classUrl = $$(gatsbyImages[1]).find('img').src() || '';
+        const factionUrl = $$(gatsbyImages[2]).find('img').src() || '';
         
         const investmentRows = $$('.afk-ex-row.data .column.ex');
         const pve = $$(investmentRows[0]).find('strong').text().trim();
