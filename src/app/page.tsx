@@ -19,6 +19,15 @@ export default function Home() {
   useEffect(() => {
     if (localStorage.getItem("characters")) {
       setHasStoredCharacters(true);
+      try {
+        const stored = localStorage.getItem("characters");
+        if (stored) {
+            setCharacters(JSON.parse(stored));
+        }
+      } catch (e) {
+        console.error("Could not parse characters from local storage", e);
+        localStorage.removeItem("characters");
+      }
     }
   }, []);
 
@@ -33,17 +42,35 @@ export default function Home() {
         description: result.error,
       });
     } else {
+      let oldCharacters: Character[] = [];
+      try {
+        const stored = localStorage.getItem("characters");
+        if (stored) {
+          oldCharacters = JSON.parse(stored);
+        }
+      } catch (e) {
+        console.error("Could not parse old characters, starting fresh.", e);
+      }
+
+      const completedStatusById = new Map<string, boolean>();
+      oldCharacters.forEach(char => {
+        if (char.completed) {
+          completedStatusById.set(char.id, true);
+        }
+      });
+
       const scrapedData = result.data || [];
-      const dataWithCompleted = scrapedData.map(char => ({
+      const dataWithPersistedCompleted = scrapedData.map(char => ({
         ...char,
-        completed: false,
+        completed: completedStatusById.get(char.id) || false,
       }));
-      setCharacters(dataWithCompleted);
-      localStorage.setItem("characters", JSON.stringify(dataWithCompleted));
+
+      setCharacters(dataWithPersistedCompleted);
+      localStorage.setItem("characters", JSON.stringify(dataWithPersistedCompleted));
       setHasStoredCharacters(true);
       toast({
         title: "Scraping Successful",
-        description: `Found ${dataWithCompleted.length} characters.`,
+        description: `Found ${dataWithPersistedCompleted.length} characters.`,
       });
     }
     setIsLoading(false);

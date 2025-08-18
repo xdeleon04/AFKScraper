@@ -9,9 +9,13 @@ export default function CharactersPage() {
     const [data, setData] = React.useState<Character[]>([]);
 
     React.useEffect(() => {
-        const storedCharacters = localStorage.getItem("characters");
-        if (storedCharacters) {
-            setData(JSON.parse(storedCharacters));
+        try {
+            const storedCharacters = localStorage.getItem("characters");
+            if (storedCharacters) {
+                setData(JSON.parse(storedCharacters));
+            }
+        } catch (error) {
+            console.error("Failed to parse characters from localStorage", error);
         }
     }, []);
 
