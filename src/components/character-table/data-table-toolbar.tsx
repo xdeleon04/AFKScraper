@@ -3,6 +3,7 @@
 import * as React from "react"
 import type { Table } from "@tanstack/react-table"
 import { X } from "lucide-react"
+import Image from "next/image"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,6 +15,13 @@ interface DataTableToolbarProps<TData> {
   data: Character[]
 }
 
+const IconOption = ({ url, alt, label }: { url: string; alt: string; label: string }) => (
+  <div className="flex items-center gap-2">
+    <Image src={url} alt={alt} width={16} height={16} data-ai-hint="fantasy icon" />
+    <span>{label}</span>
+  </div>
+)
+
 export function DataTableToolbar<TData>({
   table,
   data,
@@ -21,18 +29,30 @@ export function DataTableToolbar<TData>({
   const isFiltered = table.getState().columnFilters.length > 0
 
   const rarities = React.useMemo(() => {
-    const raritySet = new Set(data.map(c => c.rarity));
-    return Array.from(raritySet).map(r => ({ label: r, value: r }));
+    const rarityMap = new Map(data.map(c => [c.rarity, c.rarityUrl]));
+    return Array.from(rarityMap.entries()).map(([label, url]) => ({
+      value: label,
+      label: label,
+      icon: () => <IconOption url={url} alt={label} label={label}/>,
+    }));
   }, [data]);
 
   const factions = React.useMemo(() => {
-    const factionSet = new Set(data.map(c => c.faction));
-    return Array.from(factionSet).map(f => ({ label: f, value: f }));
+    const factionMap = new Map(data.map(c => [c.faction, c.factionUrl]));
+    return Array.from(factionMap.entries()).map(([label, url]) => ({
+      value: label,
+      label: label,
+      icon: () => <IconOption url={url} alt={label} label={label}/>
+    }));
   }, [data]);
 
   const classes = React.useMemo(() => {
-    const classSet = new Set(data.map(c => c.class));
-    return Array.from(classSet).map(c => ({ label: c, value: c }));
+    const classMap = new Map(data.map(c => [c.class, c.classUrl]));
+    return Array.from(classMap.entries()).map(([label, url]) => ({
+      value: label,
+      label: label,
+      icon: () => <IconOption url={url} alt={label} label={label}/>
+    }));
   }, [data]);
 
   const pve = [

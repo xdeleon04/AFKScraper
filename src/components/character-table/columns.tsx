@@ -124,6 +124,14 @@ export const columns: ColumnDef<Character>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Rarity" />
     ),
+    cell: ({ row }) => {
+        return (
+            <div className="flex items-center gap-2">
+                <Image src={row.original.rarityUrl} alt={row.original.rarity} width={24} height={24} data-ai-hint="fantasy badge" />
+                <span>{row.getValue("rarity")}</span>
+            </div>
+        )
+    },
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id))
     },
@@ -133,6 +141,14 @@ export const columns: ColumnDef<Character>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Faction" />
     ),
+    cell: ({ row }) => {
+        return (
+            <div className="flex items-center gap-2">
+                <Image src={row.original.factionUrl} alt={row.original.faction} width={24} height={24} data-ai-hint="fantasy crest" />
+                <span>{row.getValue("faction")}</span>
+            </div>
+        )
+    },
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id))
     },
@@ -142,6 +158,14 @@ export const columns: ColumnDef<Character>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Class" />
     ),
+    cell: ({ row }) => {
+        return (
+            <div className="flex items-center gap-2">
+                <Image src={row.original.classUrl} alt={row.original.class} width={24} height={24} data-ai-hint="fantasy icon" />
+                <span>{row.getValue("class")}</span>
+            </div>
+        )
+    },
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id))
     },
