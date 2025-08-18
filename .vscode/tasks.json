@@ -2,9 +2,9 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Wait for localhost:9002",
+            "label": "Wait for localhost:3000",
             "type": "shell",
-            "command": "sleep 15; npx wait-on http://localhost:9002"
+            "command": "sleep 15; npx wait-on http://localhost:3000"
         }
     ]
 }

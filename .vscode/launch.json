@@ -15,9 +15,9 @@
             "name": "Launch Edge",
             "request": "launch",
             "type": "msedge",
-            "url": "http://localhost:9002",
+            "url": "http://localhost:3000",
             "webRoot": "${workspaceFolder}",
-            "preLaunchTask": "Wait for localhost:9002"
+            "preLaunchTask": "Wait for localhost:3000"
         }
     ],
     "compounds": [
