@@ -1,7 +1,7 @@
 
 "use client"
 
-import type { ColumnDef, SortingFn } from "@tanstack/react-table"
+import type { ColumnDef, SortingFn, Row } from "@tanstack/react-table"
 import Image from "next/image";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { DataTableColumnHeader } from "./data-table-column-header";
@@ -31,10 +31,14 @@ const getInvestmentClass = (investment: string) => {
     return 'text-gray-400';
 };
 
-const prioritySorting: SortingFn<Character> = (rowA, rowB, columnId) => {
+const prioritySorting: SortingFn<Character> = (rowA: Row<Character> | Character, rowB: Row<Character> | Character, columnId) => {
   const priorityOrder = ['Very High', 'High', 'Medium', 'Low', 'N/A'];
-  const priorityA = rowA.getValue(columnId) as string;
-  const priorityB = rowB.getValue(columnId) as string;
+  
+  // The sorting function can be called with either a Row object or the raw data object.
+  // We need to handle both cases.
+  const priorityA = 'original' in rowA ? (rowA.original as any)[columnId] : (rowA as any)[columnId];
+  const priorityB = 'original' in rowB ? (rowB.original as any)[columnId] : (rowB as any)[columnId];
+  
   const indexA = priorityOrder.indexOf(priorityA);
   const indexB = priorityOrder.indexOf(priorityB);
   
@@ -44,10 +48,13 @@ const prioritySorting: SortingFn<Character> = (rowA, rowB, columnId) => {
   return finalIndexA - finalIndexB;
 };
 
-const investmentSorting: SortingFn<Character> = (rowA, rowB, columnId) => {
+const investmentSorting: SortingFn<Character> = (rowA: Row<Character> | Character, rowB: Row<Character> | Character, columnId) => {
   const investmentOrder = ['+10 → +15', '+5 → +10 → +15', '+8 → +10', '+5 → +10', '+5', '+0', 'N/A'];
-  const investmentA = rowA.getValue(columnId) as string;
-  const investmentB = rowB.getValue(columnId) as string;
+
+  // The sorting function can be called with either a Row object or the raw data object.
+  const investmentA = 'original' in rowA ? (rowA.original as any)[columnId] : (rowA as any)[columnId];
+  const investmentB = 'original' in rowB ? (rowB.original as any)[columnId] : (rowB as any)[columnId];
+
   const indexA = investmentOrder.indexOf(investmentA);
   const indexB = investmentOrder.indexOf(investmentB);
 
