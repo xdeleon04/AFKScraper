@@ -52,6 +52,11 @@ export function CharacterTable<TData extends Character, TValue>({
       rowSelection,
       columnFilters,
     },
+    initialState: {
+        pagination: {
+            pageSize: data.length,
+        },
+    },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
