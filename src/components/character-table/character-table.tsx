@@ -44,7 +44,7 @@ export function CharacterTable<TData extends Character, TValue>({
     []
   )
   const [sorting, setSorting] = React.useState<SortingState>([
-    { id: 'completed', desc: false } // Initial sort to keep completed at bottom
+    { id: 'completed', desc: false }
   ])
 
   const table = useReactTable({
@@ -57,7 +57,7 @@ export function CharacterTable<TData extends Character, TValue>({
     },
     initialState: {
         pagination: {
-            pageSize: data.length,
+            pageSize: 50,
         },
     },
     enableRowSelection: true,
@@ -95,15 +95,38 @@ export function CharacterTable<TData extends Character, TValue>({
     onDataUpdate(newData);
   }
 
-  // Effect to re-sort data when it changes
+  // Effect to re-sort data when it changes, ensuring completed items are at the bottom.
   React.useEffect(() => {
-    const sortedData = table.getSortedRowModel().rows.map(row => row.original);
+    const activeSorts = table.getState().sorting;
+    const sortedData = [...data].sort((a, b) => {
+      // Primary sort: completed status (false before true)
+      if (a.completed !== b.completed) {
+        return a.completed ? 1 : -1;
+      }
+
+      // Secondary sort: user-selected columns
+      for (const sort of activeSorts) {
+        const column = table.getColumn(sort.id);
+        if (column && column.getCanSort()) {
+          const sortingFn = column.getSortingFn();
+          if (sortingFn) {
+            const sortResult = sortingFn(table.getRow(a.id), table.getRow(b.id), sort.id);
+            if (sortResult !== 0) {
+              return sort.desc ? -sortResult : sortResult;
+            }
+          }
+        }
+      }
+
+      return 0;
+    });
+
     // Prevent infinite loop by checking if data is actually different
     if (JSON.stringify(data) !== JSON.stringify(sortedData)) {
       onDataUpdate(sortedData);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sorting, data]);
+  }, [sorting, data, table]);
 
 
   return (
