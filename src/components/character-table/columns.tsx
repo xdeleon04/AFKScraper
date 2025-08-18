@@ -188,11 +188,5 @@ export const columns: ColumnDef<Character>[] = [
     },
     enableSorting: true,
     enableHiding: true,
-    // Sorts false (incomplete) before true (completed)
-    sortingFn: (rowA, rowB, columnId) => {
-        const completedA = rowA.original[columnId as keyof Character] as boolean;
-        const completedB = rowB.original[columnId as keyof Character] as boolean;
-        return completedA === completedB ? 0 : completedA ? 1 : -1;
-    },
   },
 ]

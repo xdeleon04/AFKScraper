@@ -48,15 +48,6 @@ export function CharacterTable<TData extends Character, TValue>({
     { id: 'completed', desc: false }
   ])
 
-  React.useEffect(() => {
-    setSorting(prev => {
-        const completedSort = { id: 'completed', desc: false };
-        const otherSorts = prev.filter(s => s.id !== 'completed');
-        return [completedSort, ...otherSorts];
-    });
-}, [data]);
-
-
   const table = useReactTable({
     data,
     columns,
@@ -67,9 +58,10 @@ export function CharacterTable<TData extends Character, TValue>({
     },
     initialState: {
         pagination: {
-            pageSize: 50,
+            pageSize: data.length,
         },
     },
+    enableMultiSort: true,
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,

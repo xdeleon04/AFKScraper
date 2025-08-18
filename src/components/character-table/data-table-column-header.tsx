@@ -1,3 +1,4 @@
+
 "use client"
 
 import {
@@ -33,6 +34,15 @@ export function DataTableColumnHeader<TData, TValue>({
     return <div className={cn(className)}>{title}</div>
   }
 
+  const handleSort = (desc: boolean | undefined) => (e: React.MouseEvent<HTMLDivElement>) => {
+    if (desc === undefined) {
+      column.clearSorting();
+      return;
+    }
+    const isMultiSort = e.shiftKey;
+    column.toggleSorting(desc, isMultiSort);
+  }
+
   return (
     <div className={cn("flex items-center space-x-2", className)}>
       <DropdownMenu>
@@ -53,16 +63,16 @@ export function DataTableColumnHeader<TData, TValue>({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start">
-          <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
+          <DropdownMenuItem onClick={handleSort(false)}>
             <ArrowUpIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
             Asc
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
+          <DropdownMenuItem onClick={handleSort(true)}>
             <ArrowDownIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
             Desc
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => column.clearSorting()}>
+          <DropdownMenuItem onClick={handleSort(undefined)}>
             <EyeOff className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
             Clear sort
           </DropdownMenuItem>
