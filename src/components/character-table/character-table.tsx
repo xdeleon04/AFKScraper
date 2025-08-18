@@ -68,81 +68,65 @@ export function CharacterTable<TData extends Character, TValue>({
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
+    meta: {
+      updateData: (rowIndex: number, columnId: string, value: any) => {
+        const newData = data.map((row, index) => {
+          if (index === rowIndex) {
+            return {
+              ...(row as TData),
+              [columnId]: value,
+            }
+          }
+          return row
+        })
+        onDataUpdate(newData)
+      }
+    }
   })
 
   const handleRowClick = (row: Row<TData>) => {
-    const characterId = (row.original as Character).id;
+    const characterId = row.original.id;
     const newData = data.map(char => 
-        (char as Character).id === characterId ? { ...char, completed: !char.completed } : char
+        char.id === characterId ? { ...char, completed: !char.completed } : char
     );
-
-    const sortedData = [...newData].sort((a, b) => {
-      const charA = a as Character;
-      const charB = b as Character;
-
-      // Primary sorting: completed characters always go to the bottom.
-      if (charA.completed && !charB.completed) return 1;
-      if (!charA.completed && charB.completed) return -1;
-      
-      // Secondary sorting: respect the table's active sort order.
-      const sortOrder = table.getState().sorting;
-      if (sortOrder.length > 0) {
-        for (const sort of sortOrder) {
-          const column = table.getColumn(sort.id);
-          if (column) {
-            const sortingFn = column.getSortingFn();
-            if (sortingFn) {
-              const rowA = table.getRow(charA.id) ?? { original: a } as Row<TData>;
-              const rowB = table.getRow(charB.id) ?? { original: b } as Row<TData>;
-              
-              // We need to create mock Row objects if they are not found in the table instance,
-              // as the data has been updated.
-              const mockRowA = rowA.original ? rowA : { original: a } as Row<TData>;
-              const mockRowB = rowB.original ? rowB : { original: b } as Row<TData>;
-              
-              const sortResult = sortingFn(mockRowA, mockRowB, sort.id) * (sort.desc ? -1 : 1);
-              if (sortResult !== 0) return sortResult;
-            }
-          }
-        }
-      }
-      return 0;
-    });
-
-    onDataUpdate(sortedData);
+    onDataUpdate(newData);
   }
 
   React.useEffect(() => {
-    // When sorting changes, we need to re-apply our custom completed logic
+    // When data or sorting changes, re-apply our custom completed logic
     const sortOrder = table.getState().sorting;
-    if (sortOrder.length > 0) {
-        const sortedData = [...data].sort((a, b) => {
-            const charA = a as Character;
-            const charB = b as Character;
+    
+    const sortedData = [...data].sort((a, b) => {
+        const charA = a as Character;
+        const charB = b as Character;
 
-            if (charA.completed && !charB.completed) return 1;
-            if (!charA.completed && charB.completed) return -1;
-
-            for (const sort of sortOrder) {
-                const column = table.getColumn(sort.id);
-                if (column) {
-                    const sortingFn = column.getSortingFn();
-                    if (sortingFn) {
-                        const rowA = table.getRow(charA.id) ?? { original: a } as Row<TData>;
-                        const rowB = table.getRow(charB.id) ?? { original: b } as Row<TData>;
-                        const mockRowA = rowA.original ? rowA : { original: a } as Row<TData>;
-                        const mockRowB = rowB.original ? rowB : { original: b } as Row<TData>;
-                        const sortResult = sortingFn(mockRowA, mockRowB, sort.id) * (sort.desc ? -1 : 1);
-                        if (sortResult !== 0) return sortResult;
-                    }
-                }
+        // Primary sorting: completed characters always go to the bottom.
+        if (charA.completed && !charB.completed) return 1;
+        if (!charA.completed && charB.completed) return -1;
+        
+        // Secondary sorting: respect the table's active sort order.
+        if (sortOrder.length > 0) {
+          for (const sort of sortOrder) {
+            const column = table.getColumn(sort.id);
+            if (column) {
+              const sortingFn = column.getSortingFn();
+              if (sortingFn) {
+                // The custom sorting functions in columns.tsx are designed to handle raw data objects
+                const sortResult = sortingFn(a, b, sort.id) * (sort.desc ? -1 : 1);
+                if (sortResult !== 0) return sortResult;
+              }
             }
-            return 0;
-        });
-        onDataUpdate(sortedData);
+          }
+        }
+        return 0;
+    });
+
+    // Only update if the order has actually changed to prevent infinite loops
+    if (JSON.stringify(data) !== JSON.stringify(sortedData)) {
+      onDataUpdate(sortedData);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sorting, table]);
+  }, [sorting, data, table.getColumn, onDataUpdate]);
 
   return (
     <div className="space-y-4">
