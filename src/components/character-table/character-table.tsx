@@ -5,6 +5,7 @@ import {
   type ColumnDef,
   type ColumnFiltersState,
   type SortingState,
+  type Row,
   flexRender,
   getCoreRowModel,
   getFacetedRowModel,
@@ -69,15 +70,18 @@ export function CharacterTable<TData extends Character, TValue>({
     getFacetedUniqueValues: getFacetedUniqueValues(),
   })
 
-  const handleRowClick = (row: any) => {
-    const characterId = row.original.id;
+  const handleRowClick = (row: Row<TData>) => {
+    const characterId = (row.original as Character).id;
     const newData = data.map(char => 
-        char.id === characterId ? { ...char, completed: !char.completed } : char
+        (char as Character).id === characterId ? { ...char, completed: !char.completed } : char
     );
 
     const sortedData = [...newData].sort((a, b) => {
-      if (a.completed && !b.completed) return 1;
-      if (!a.completed && b.completed) return -1;
+      const charA = a as Character;
+      const charB = b as Character;
+
+      if (charA.completed && !charB.completed) return 1;
+      if (!charA.completed && charB.completed) return -1;
       
       const sortOrder = table.getState().sorting;
       if (sortOrder.length > 0) {
@@ -86,7 +90,9 @@ export function CharacterTable<TData extends Character, TValue>({
           if (column) {
             const sortingFn = column.getSortingFn();
             if (sortingFn) {
-              const sortResult = sortingFn(a, b, sort.id) * (sort.desc ? -1 : 1);
+              const rowA = { original: a } as Row<TData>;
+              const rowB = { original: b } as Row<TData>;
+              const sortResult = sortingFn(rowA, rowB, sort.id) * (sort.desc ? -1 : 1);
               if (sortResult !== 0) return sortResult;
             }
           }
@@ -100,7 +106,7 @@ export function CharacterTable<TData extends Character, TValue>({
 
   return (
     <div className="space-y-4">
-      <DataTableToolbar table={table} data={data}/>
+      <DataTableToolbar table={table} data={data as Character[]}/>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
