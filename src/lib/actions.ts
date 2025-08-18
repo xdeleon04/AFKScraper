@@ -67,8 +67,8 @@ export async function scrapeAndProcessCharacters(): Promise<{
         const priority = $$('.column.priority p').text().trim() || 'N/A';
 
         const investmentColumns = $$('.column.ex');
-        const pve = $$(investmentColumns[0]).find('strong').text().trim() || 'N/A';
-        const pvp = $$(investmentColumns[1]).find('strong').text().trim() || 'N/A';
+        const pve = $$(investmentColumns[0]).find('p').not('.on-mobile').text().trim() || 'N/A';
+        const pvp = $$(investmentColumns[1]).find('p').not('.on-mobile').text().trim() || 'N/A';
 
         const character: Character = {
           id,
@@ -83,6 +83,7 @@ export async function scrapeAndProcessCharacters(): Promise<{
           rarityUrl: rarityUrl ? `${BASE_URL}${rarityUrl}` : 'https://placehold.co/32x32.png',
           factionUrl: factionUrl ? `${BASE_URL}${factionUrl}` : 'https://placehold.co/32x32.png',
           classUrl: classUrl ? `${BASE_URL}${classUrl}` : 'https://placehold.co/32x32.png',
+          completed: false,
         };
         return character;
       } catch (e) {
