@@ -47,7 +47,7 @@ const prioritySorting: SortingFn<Character> = (rowA, rowB, columnId) => {
 };
 
 const investmentSorting: SortingFn<Character> = (rowA, rowB, columnId) => {
-  const investmentOrder = ['+10 → +15', '+5 → +10 → +15', '+8 → +10', '+5 → +10', '+5', '+0', 'N/A'];
+  const investmentOrder = ['+5 → +10 → +15', '+10 → +15', '+8 → +10', '+5 → +10', '+5', '+0', 'N/A'];
 
   const investmentA = rowA.original[columnId as keyof Character] as string;
   const investmentB = rowB.original[columnId as keyof Character] as string;

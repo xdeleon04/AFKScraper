@@ -34,13 +34,12 @@ export function DataTableColumnHeader<TData, TValue>({
     return <div className={cn(className)}>{title}</div>
   }
 
-  const handleSort = (desc: boolean | undefined) => (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleSort = (desc: boolean | undefined) => () => {
     if (desc === undefined) {
       column.clearSorting();
       return;
     }
-    const isMultiSort = e.shiftKey;
-    column.toggleSorting(desc, isMultiSort);
+    column.toggleSorting(desc, true); // Always multi-sort
   }
 
   return (
