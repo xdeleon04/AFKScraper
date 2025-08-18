@@ -1,6 +1,6 @@
 "use client"
 
-import type { ColumnDef } from "@tanstack/react-table"
+import type { ColumnDef, SortingFn } from "@tanstack/react-table"
 import Image from "next/image";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { DataTableColumnHeader } from "./data-table-column-header";
@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 
 const getPriorityClass = (priority: string) => {
   switch (priority.toLowerCase()) {
+    case 'very high':
+      return 'bg-purple-500 hover:bg-purple-500/80';
     case 'high':
       return 'bg-red-500 hover:bg-red-500/80';
     case 'medium':
@@ -24,6 +26,20 @@ const getInvestmentClass = (investment: string) => {
     if (investment.includes('+10')) return 'text-green-400';
     if (investment.includes('+')) return 'text-yellow-400';
     return 'text-gray-400';
+};
+
+const prioritySorting: SortingFn<Character> = (rowA, rowB, columnId) => {
+  const priorityOrder = ['Very High', 'High', 'Medium', 'Low', 'N/A'];
+  const priorityA = rowA.getValue(columnId) as string;
+  const priorityB = rowB.getValue(columnId) as string;
+  const indexA = priorityOrder.indexOf(priorityA);
+  const indexB = priorityOrder.indexOf(priorityB);
+  
+  // Treat priorities not in the list as lowest
+  const finalIndexA = indexA === -1 ? priorityOrder.length : indexA;
+  const finalIndexB = indexB === -1 ? priorityOrder.length : indexB;
+
+  return finalIndexA - finalIndexB;
 };
 
 
@@ -61,6 +77,7 @@ export const columns: ColumnDef<Character>[] = [
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id))
     },
+    sortingFn: prioritySorting,
   },
   {
     accessorKey: "pve",
