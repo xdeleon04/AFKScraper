@@ -29,18 +29,6 @@ const getInvestmentClass = (investment: string) => {
 
 export const columns: ColumnDef<Character>[] = [
   {
-    accessorKey: "completed",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Completed" />
-    ),
-    cell: ({ row }) => {
-      const completed = row.getValue("completed");
-      return completed ? <CheckCircle2 className="text-green-500" /> : <XCircle className="text-muted-foreground" />;
-    },
-    enableSorting: true,
-    enableHiding: true,
-  },
-  {
     accessorKey: "name",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Character" />
@@ -126,5 +114,17 @@ export const columns: ColumnDef<Character>[] = [
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id))
     },
+  },
+  {
+    accessorKey: "completed",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Completed" />
+    ),
+    cell: ({ row }) => {
+      const completed = row.getValue("completed");
+      return completed ? <CheckCircle2 className="text-green-500" /> : <XCircle className="text-muted-foreground" />;
+    },
+    enableSorting: true,
+    enableHiding: true,
   },
 ]
