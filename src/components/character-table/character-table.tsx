@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -47,6 +48,15 @@ export function CharacterTable<TData extends Character, TValue>({
     { id: 'completed', desc: false }
   ])
 
+  React.useEffect(() => {
+    setSorting(prev => {
+        const completedSort = { id: 'completed', desc: false };
+        const otherSorts = prev.filter(s => s.id !== 'completed');
+        return [completedSort, ...otherSorts];
+    });
+}, [data]);
+
+
   const table = useReactTable({
     data,
     columns,
@@ -94,40 +104,6 @@ export function CharacterTable<TData extends Character, TValue>({
     );
     onDataUpdate(newData);
   }
-
-  // Effect to re-sort data when it changes, ensuring completed items are at the bottom.
-  React.useEffect(() => {
-    const activeSorts = table.getState().sorting;
-    const sortedData = [...data].sort((a, b) => {
-      // Primary sort: completed status (false before true)
-      if (a.completed !== b.completed) {
-        return a.completed ? 1 : -1;
-      }
-
-      // Secondary sort: user-selected columns
-      for (const sort of activeSorts) {
-        const column = table.getColumn(sort.id);
-        if (column && column.getCanSort()) {
-          const sortingFn = column.getSortingFn();
-          if (sortingFn) {
-            const sortResult = sortingFn(table.getRow(a.id), table.getRow(b.id), sort.id);
-            if (sortResult !== 0) {
-              return sort.desc ? -sortResult : sortResult;
-            }
-          }
-        }
-      }
-
-      return 0;
-    });
-
-    // Prevent infinite loop by checking if data is actually different
-    if (JSON.stringify(data) !== JSON.stringify(sortedData)) {
-      onDataUpdate(sortedData);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sorting, data, table]);
-
 
   return (
     <div className="space-y-4">
