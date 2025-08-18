@@ -4,6 +4,7 @@ import {
   ArrowDownIcon,
   ArrowUpIcon,
   ChevronsUpDownIcon,
+  EyeOff,
 } from "lucide-react"
 import type { Column } from "@tanstack/react-table"
 
@@ -59,6 +60,11 @@ export function DataTableColumnHeader<TData, TValue>({
           <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
             <ArrowDownIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
             Desc
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => column.clearSorting()}>
+            <EyeOff className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
+            Clear sort
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
