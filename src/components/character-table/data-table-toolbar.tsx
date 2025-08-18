@@ -60,16 +60,16 @@ export function DataTableToolbar<TData>({
     { label: '+5', value: '+5' },
     { label: '+5 → +10', value: '+5 → +10' },
     { label: '+8 → +10', value: '+8 → +10' },
-    { label: '+10 → +15', value: '+5 → +10' },
+    { label: '+10 → +15', value: '+10 → +15' },
     { label: '+5 → +10 → +15', value: '+5 → +10 → +15' },
   ];
 
   const pvp = [
     { label: '+0', value: '+0' },
     { label: '+5', value: '+5' },
-    { label: '+5 → +10', value: '++5 → +10' },
+    { label: '+5 → +10', value: '+5 → +10' },
     { label: '+8 → +10', value: '+8 → +10' },
-    { label: '+10 → +15', value: '+5 → +10' },
+    { label: '+10 → +15', value: '+10 → +15' },
     { label: '+5 → +10 → +15', value: '+5 → +10 → +15' },
   ];
   
