@@ -35,15 +35,23 @@ export function DataTableToolbar<TData>({
     return Array.from(classSet).map(c => ({ label: c, value: c }));
   }, [data]);
 
-  const pve = React.useMemo(() => {
-    const pveSet = new Set(data.map(c => c.pve));
-    return Array.from(pveSet).map(p => ({ label: p, value: p }));
-  }, [data]);
+  const pve = [
+    { label: '0+', value: '0+' },
+    { label: '+5', value: '+5' },
+    { label: '+5 → +10', value: '+5 → +10' },
+    { label: '+8 → +10', value: '+8 → +10' },
+    { label: '+10 → +15', value: '+10 → +15' },
+    { label: '+5 → +10 → +15', value: '+5 → +10 → +15' },
+  ];
 
-  const pvp = React.useMemo(() => {
-    const pvpSet = new Set(data.map(c => c.pvp));
-    return Array.from(pvpSet).map(p => ({ label: p, value: p }));
-  }, [data]);
+  const pvp = [
+    { label: '0+', value: '0+' },
+    { label: '+5', value: '+5' },
+    { label: '+5 → +10', value: '+5 → +10' },
+    { label: '+8 → +10', value: '+8 → +10' },
+    { label: '+10 → +15', value: '+10 → +15' },
+    { label: '+5 → +10 → +15', value: '+5 → +10 → +15' },
+  ];
   
   const priorities = React.useMemo(() => {
     const prioritySet = new Set(data.map(c => c.priority));
