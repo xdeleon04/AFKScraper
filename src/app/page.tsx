@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -13,7 +13,14 @@ import { Download, Wand2, Table } from "lucide-react";
 export default function Home() {
   const [characters, setCharacters] = useState<Character[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasStoredCharacters, setHasStoredCharacters] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (localStorage.getItem("characters")) {
+      setHasStoredCharacters(true);
+    }
+  }, []);
 
   const handleScrape = async () => {
     setIsLoading(true);
@@ -33,6 +40,7 @@ export default function Home() {
       }));
       setCharacters(dataWithCompleted);
       localStorage.setItem("characters", JSON.stringify(dataWithCompleted));
+      setHasStoredCharacters(true);
       toast({
         title: "Scraping Successful",
         description: `Found ${dataWithCompleted.length} characters.`,
@@ -42,9 +50,12 @@ export default function Home() {
   };
 
   const handleDownload = () => {
-    if (characters.length === 0) return;
+    const dataString = localStorage.getItem('characters');
+    const dataToDownload = dataString ? JSON.parse(dataString) : characters;
+    
+    if (dataToDownload.length === 0) return;
 
-    const dataToDownload = characters.map(char => ({
+    const formattedData = dataToDownload.map((char: Character) => ({
       id: parseInt(char.id, 10),
       name: char.name,
       rarity: char.rarity,
@@ -53,14 +64,14 @@ export default function Home() {
       pve: char.pve,
       pvp: char.pvp,
       priority: char.priority,
-      completed: char.completed,
+      completed: char.completed || false,
       imageUrl: char.imageUrl,
       rarityUrl: char.rarityUrl,
       factionUrl: char.factionUrl,
       typeUrl: char.classUrl,
     }));
 
-    const jsonString = JSON.stringify(dataToDownload, null, 2);
+    const jsonString = JSON.stringify(formattedData, null, 2);
     const blob = new Blob([jsonString], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -102,7 +113,7 @@ export default function Home() {
           </Button>
           <Button
             onClick={handleDownload}
-            disabled={characters.length === 0 || isLoading}
+            disabled={characters.length === 0 && !hasStoredCharacters}
             variant="outline"
             size="lg"
           >
@@ -113,7 +124,7 @@ export default function Home() {
             <Button
               variant="outline"
               size="lg"
-              disabled={characters.length === 0 && !localStorage.getItem('characters')}
+              disabled={characters.length === 0 && !hasStoredCharacters}
             >
               <Table className="mr-2 h-5 w-5" />
               View Data
