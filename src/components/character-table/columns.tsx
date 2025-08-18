@@ -35,9 +35,21 @@ const prioritySorting: SortingFn<Character> = (rowA, rowB, columnId) => {
   const indexA = priorityOrder.indexOf(priorityA);
   const indexB = priorityOrder.indexOf(priorityB);
   
-  // Treat priorities not in the list as lowest
   const finalIndexA = indexA === -1 ? priorityOrder.length : indexA;
   const finalIndexB = indexB === -1 ? priorityOrder.length : indexB;
+
+  return finalIndexA - finalIndexB;
+};
+
+const investmentSorting: SortingFn<Character> = (rowA, rowB, columnId) => {
+  const investmentOrder = ['+10 → +15', '+5 → +10 → +15', '+8 → +10', '+5 → +10', '+5', '+0', 'N/A'];
+  const investmentA = rowA.getValue(columnId) as string;
+  const investmentB = rowB.getValue(columnId) as string;
+  const indexA = investmentOrder.indexOf(investmentA);
+  const indexB = investmentOrder.indexOf(investmentB);
+
+  const finalIndexA = indexA === -1 ? investmentOrder.length : indexA;
+  const finalIndexB = indexB === -1 ? investmentOrder.length : indexB;
 
   return finalIndexA - finalIndexB;
 };
@@ -91,6 +103,7 @@ export const columns: ColumnDef<Character>[] = [
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id))
     },
+    sortingFn: investmentSorting,
   },
   {
     accessorKey: "pvp",
@@ -104,6 +117,7 @@ export const columns: ColumnDef<Character>[] = [
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id))
     },
+    sortingFn: investmentSorting,
   },
   {
     accessorKey: "rarity",
