@@ -11,4 +11,5 @@ export interface Character {
   rarityUrl: string;
   factionUrl: string;
   classUrl: string;
+  completed: boolean;
 }

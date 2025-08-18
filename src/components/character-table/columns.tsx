@@ -1,0 +1,130 @@
+"use client"
+
+import type { ColumnDef } from "@tanstack/react-table"
+import Image from "next/image";
+import { CheckCircle2, XCircle } from "lucide-react";
+import { DataTableColumnHeader } from "./data-table-column-header";
+import type { Character } from "@/lib/types"
+import { Badge } from "@/components/ui/badge";
+
+const getPriorityClass = (priority: string) => {
+  switch (priority.toLowerCase()) {
+    case 'high':
+      return 'bg-red-500 hover:bg-red-500/80';
+    case 'medium':
+      return 'bg-yellow-500 hover:bg-yellow-500/80';
+    case 'low':
+      return 'bg-green-500 hover:bg-green-500/80';
+    default:
+      return 'bg-gray-500 hover:bg-gray-500/80';
+  }
+}
+
+const getInvestmentClass = (investment: string) => {
+    if (investment.includes('+10')) return 'text-green-400';
+    if (investment.includes('+')) return 'text-yellow-400';
+    return 'text-gray-400';
+};
+
+
+export const columns: ColumnDef<Character>[] = [
+  {
+    accessorKey: "completed",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Completed" />
+    ),
+    cell: ({ row }) => {
+      const completed = row.getValue("completed");
+      return completed ? <CheckCircle2 className="text-green-500" /> : <XCircle className="text-muted-foreground" />;
+    },
+    enableSorting: true,
+    enableHiding: true,
+  },
+  {
+    accessorKey: "name",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Character" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="flex items-center gap-4">
+          <Image 
+            src={row.original.imageUrl} 
+            alt={row.original.name} 
+            width={40} 
+            height={40}
+            className="rounded-full"
+            data-ai-hint="character avatar"
+          />
+          <span className="font-medium">{row.getValue("name")}</span>
+        </div>
+      )
+    }
+  },
+  {
+    accessorKey: "priority",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Priority" />
+    ),
+    cell: ({ row }) => {
+      const priority = row.getValue("priority") as string;
+      return <Badge className={getPriorityClass(priority)}>{priority}</Badge>
+    },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id))
+    },
+  },
+  {
+    accessorKey: "pve",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="PVE Investment" />
+    ),
+    cell: ({ row }) => {
+      const pve = row.getValue("pve") as string
+      return <span className={getInvestmentClass(pve)}>{pve}</span>
+    },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id))
+    },
+  },
+  {
+    accessorKey: "pvp",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="PVP Investment" />
+    ),
+    cell: ({ row }) => {
+       const pvp = row.getValue("pvp") as string
+      return <span className={getInvestmentClass(pvp)}>{pvp}</span>
+    },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id))
+    },
+  },
+  {
+    accessorKey: "rarity",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Rarity" />
+    ),
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id))
+    },
+  },
+  {
+    accessorKey: "faction",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Faction" />
+    ),
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id))
+    },
+  },
+  {
+    accessorKey: "class",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Class" />
+    ),
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id))
+    },
+  },
+]

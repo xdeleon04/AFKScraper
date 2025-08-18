@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { scrapeAndProcessCharacters } from "@/lib/actions";
 import type { Character } from "@/lib/types";
 import { CharacterCard } from "@/components/character-card";
 import { CharacterCardSkeleton } from "@/components/character-card-skeleton";
-import { Download, Wand2 } from "lucide-react";
+import { Download, Wand2, Table } from "lucide-react";
 
 export default function Home() {
   const [characters, setCharacters] = useState<Character[]>([]);
@@ -25,10 +26,16 @@ export default function Home() {
         description: result.error,
       });
     } else {
-      setCharacters(result.data || []);
+      const scrapedData = result.data || [];
+      const dataWithCompleted = scrapedData.map(char => ({
+        ...char,
+        completed: false,
+      }));
+      setCharacters(dataWithCompleted);
+      localStorage.setItem("characters", JSON.stringify(dataWithCompleted));
       toast({
         title: "Scraping Successful",
-        description: `Found ${result.data?.length || 0} characters.`,
+        description: `Found ${dataWithCompleted.length} characters.`,
       });
     }
     setIsLoading(false);
@@ -46,7 +53,7 @@ export default function Home() {
       pve: char.pve,
       pvp: char.pvp,
       priority: char.priority,
-      completed: false, // Defaulted to false as requested
+      completed: char.completed,
       imageUrl: char.imageUrl,
       rarityUrl: char.rarityUrl,
       factionUrl: char.factionUrl,
@@ -102,6 +109,16 @@ export default function Home() {
             <Download className="mr-2 h-5 w-5" />
             Download JSON
           </Button>
+           <Link href="/characters" passHref>
+            <Button
+              variant="outline"
+              size="lg"
+              disabled={characters.length === 0 && !localStorage.getItem('characters')}
+            >
+              <Table className="mr-2 h-5 w-5" />
+              View Data
+            </Button>
+          </Link>
         </div>
       </div>
 
