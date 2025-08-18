@@ -1,3 +1,4 @@
+
 "use client"
 
 import type { ColumnDef, SortingFn } from "@tanstack/react-table"
@@ -23,8 +24,10 @@ const getPriorityClass = (priority: string) => {
 }
 
 const getInvestmentClass = (investment: string) => {
+    if (investment.includes('+15')) return 'text-purple-400';
     if (investment.includes('+10')) return 'text-green-400';
-    if (investment.includes('+')) return 'text-yellow-400';
+    if (investment.includes('+8')) return 'text-sky-400';
+    if (investment.includes('+5')) return 'text-yellow-400';
     return 'text-gray-400';
 };
 
