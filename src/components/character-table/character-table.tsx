@@ -76,17 +76,21 @@ export function CharacterTable<TData extends Character, TValue>({
     );
 
     const sortedData = [...newData].sort((a, b) => {
-      // First, sort by completion status
       if (a.completed && !b.completed) return 1;
       if (!a.completed && b.completed) return -1;
       
-      // If completion status is the same, use the table's sorting
       const sortOrder = table.getState().sorting;
-      for (const sort of sortOrder) {
-          const aValue = (a as any)[sort.id];
-          const bValue = (b as any)[sort.id];
-          if (aValue < bValue) return sort.desc ? 1 : -1;
-          if (aValue > bValue) return sort.desc ? -1 : 1;
+      if (sortOrder.length > 0) {
+        for (const sort of sortOrder) {
+          const column = table.getColumn(sort.id);
+          if (column) {
+            const sortingFn = column.getSortingFn();
+            if (sortingFn) {
+              const sortResult = sortingFn(a, b, sort.id) * (sort.desc ? -1 : 1);
+              if (sortResult !== 0) return sortResult;
+            }
+          }
+        }
       }
       return 0;
     });
