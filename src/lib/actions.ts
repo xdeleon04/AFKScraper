@@ -50,13 +50,10 @@ export async function scrapeAndProcessCharacters(): Promise<{
             return null;
         }
 
-        const h2Text = $$('.combined > h2').text();
-        const rarityMatch = h2Text.match(/is an (A-Level|S-Level)/);
-        const rarityText = rarityMatch ? rarityMatch[1] : 'Unknown';
-
         const strongs = $$('.combined > h2 > strong');
-        const classText = $$(strongs[1]).text().trim();
-        const factionText = $$(strongs[2]).text().trim();
+        const rarityText = $$(strongs[1]).text().trim();
+        const classText = $$(strongs[2]).text().trim();
+        const factionText = $$(strongs[3]).text().trim();
 
         const gatsbyImages = $$('.combined > h2 .gatsby-image-wrapper picture img');
         const rarityUrl = $$(gatsbyImages[0]).attr('data-src') || '';

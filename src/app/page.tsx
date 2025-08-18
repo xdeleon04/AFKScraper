@@ -68,7 +68,7 @@ export default function Home() {
       imageUrl: char.imageUrl,
       rarityUrl: char.rarityUrl,
       factionUrl: char.factionUrl,
-      typeUrl: char.classUrl,
+      classUrl: char.classUrl,
     }));
 
     const jsonString = JSON.stringify(formattedData, null, 2);
