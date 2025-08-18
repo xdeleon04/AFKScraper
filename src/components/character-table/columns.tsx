@@ -31,13 +31,11 @@ const getInvestmentClass = (investment: string) => {
     return 'text-gray-400';
 };
 
-const prioritySorting: SortingFn<Character> = (rowA: Row<Character> | Character, rowB: Row<Character> | Character, columnId) => {
+const prioritySorting: SortingFn<Character> = (rowA, rowB, columnId) => {
   const priorityOrder = ['Very High', 'High', 'Medium', 'Low', 'N/A'];
   
-  // The sorting function can be called with either a Row object or the raw data object.
-  // We need to handle both cases.
-  const priorityA = 'original' in rowA ? (rowA.original as any)[columnId] : (rowA as any)[columnId];
-  const priorityB = 'original' in rowB ? (rowB.original as any)[columnId] : (rowB as any)[columnId];
+  const priorityA = rowA.original[columnId as keyof Character] as string;
+  const priorityB = rowB.original[columnId as keyof Character] as string;
   
   const indexA = priorityOrder.indexOf(priorityA);
   const indexB = priorityOrder.indexOf(priorityB);
@@ -48,12 +46,11 @@ const prioritySorting: SortingFn<Character> = (rowA: Row<Character> | Character,
   return finalIndexA - finalIndexB;
 };
 
-const investmentSorting: SortingFn<Character> = (rowA: Row<Character> | Character, rowB: Row<Character> | Character, columnId) => {
+const investmentSorting: SortingFn<Character> = (rowA, rowB, columnId) => {
   const investmentOrder = ['+10 → +15', '+5 → +10 → +15', '+8 → +10', '+5 → +10', '+5', '+0', 'N/A'];
 
-  // The sorting function can be called with either a Row object or the raw data object.
-  const investmentA = 'original' in rowA ? (rowA.original as any)[columnId] : (rowA as any)[columnId];
-  const investmentB = 'original' in rowB ? (rowB.original as any)[columnId] : (rowB as any)[columnId];
+  const investmentA = rowA.original[columnId as keyof Character] as string;
+  const investmentB = rowB.original[columnId as keyof Character] as string;
 
   const indexA = investmentOrder.indexOf(investmentA);
   const indexB = investmentOrder.indexOf(investmentB);
@@ -191,5 +188,11 @@ export const columns: ColumnDef<Character>[] = [
     },
     enableSorting: true,
     enableHiding: true,
+    // Sorts false (incomplete) before true (completed)
+    sortingFn: (rowA, rowB, columnId) => {
+        const completedA = rowA.original[columnId as keyof Character] as boolean;
+        const completedB = rowB.original[columnId as keyof Character] as boolean;
+        return completedA === completedB ? 0 : completedA ? 1 : -1;
+    },
   },
 ]

@@ -43,7 +43,9 @@ export function CharacterTable<TData extends Character, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   )
-  const [sorting, setSorting] = React.useState<SortingState>([])
+  const [sorting, setSorting] = React.useState<SortingState>([
+    { id: 'completed', desc: false } // Initial sort to keep completed at bottom
+  ])
 
   const table = useReactTable({
     data,
@@ -81,7 +83,8 @@ export function CharacterTable<TData extends Character, TValue>({
         })
         onDataUpdate(newData)
       }
-    }
+    },
+    sortDescFirst: false,
   })
 
   const handleRowClick = (row: Row<TData>) => {
@@ -92,41 +95,16 @@ export function CharacterTable<TData extends Character, TValue>({
     onDataUpdate(newData);
   }
 
+  // Effect to re-sort data when it changes
   React.useEffect(() => {
-    // When data or sorting changes, re-apply our custom completed logic
-    const sortOrder = table.getState().sorting;
-    
-    const sortedData = [...data].sort((a, b) => {
-        const charA = a as Character;
-        const charB = b as Character;
-
-        // Primary sorting: completed characters always go to the bottom.
-        if (charA.completed && !charB.completed) return 1;
-        if (!charA.completed && charB.completed) return -1;
-        
-        // Secondary sorting: respect the table's active sort order.
-        if (sortOrder.length > 0) {
-          for (const sort of sortOrder) {
-            const column = table.getColumn(sort.id);
-            if (column) {
-              const sortingFn = column.getSortingFn();
-              if (sortingFn) {
-                // The custom sorting functions in columns.tsx are designed to handle raw data objects
-                const sortResult = sortingFn(a, b, sort.id) * (sort.desc ? -1 : 1);
-                if (sortResult !== 0) return sortResult;
-              }
-            }
-          }
-        }
-        return 0;
-    });
-
-    // Only update if the order has actually changed to prevent infinite loops
+    const sortedData = table.getSortedRowModel().rows.map(row => row.original);
+    // Prevent infinite loop by checking if data is actually different
     if (JSON.stringify(data) !== JSON.stringify(sortedData)) {
       onDataUpdate(sortedData);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sorting, data, table.getColumn, onDataUpdate]);
+  }, [sorting, data]);
+
 
   return (
     <div className="space-y-4">
